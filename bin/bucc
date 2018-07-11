@@ -370,7 +370,7 @@ _bosh() {
         bosh log-in -e "$(_alias)"
 }
 
-_credhub() {
+_credhub_download() {
     local url="https://github.com/cloudfoundry-incubator/credhub-cli/releases/download"
     local version=$(grep credhub ${repo_root}/.versions | cut -d= -f2)
     local cli_path=${repo_root}/bin/credhub
@@ -384,14 +384,18 @@ _credhub() {
       mv credhub ${repo_root}/bin/
       popd
     fi
+}
 
+_credhub() {
+    _credhub_download
+    local cli_path=${repo_root}/bin/credhub
     ${cli_path} login --server $(get_var credhub_url) \
             --ca-cert $(ca_cert) \
             --client-name credhub-admin \
             --client-secret $(get_var credhub_password)
 }
 
-_bbr() {
+_bbr_download() {
     local url="https://github.com/cloudfoundry-incubator/bosh-backup-and-restore/releases/download"
     local version=$(grep bbr ${repo_root}/.versions | cut -d= -f2)
     local cli_path=${repo_root}/bin/bbr
@@ -408,7 +412,11 @@ _bbr() {
       fi
       popd
     fi
+}
 
+_bbr() {
+    _bbr_download
+    local cli_path=${repo_root}/bin/bbr
     local user=$(int --path /instance_groups/name=bosh/jobs/name=user_add/properties/users/0/name)
     ${cli_path} director --host $(ip) --username ${user} --private-key-path $(ssh_private_key) "$@"
 }
@@ -543,6 +551,8 @@ _spruce() {
 offline() {
   set -e
   _spruce
+  _credhub_download
+  _bbr_download
 
   yml_filelocation=${project_root}/operators
   offline_filelocation=${project_root}/offline_resources
