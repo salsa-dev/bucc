@@ -13,7 +13,7 @@ releases:
 
 resource_pools:
 - name: vms
-  network: default
+  network: host
   env:
     bosh:
       password: '*'
@@ -25,8 +25,9 @@ disk_pools:
   disk_size: 65_536
 
 networks:
-- name: default
+- name: host
   type: manual
+  mode: host
   subnets:
   - range: ((internal_cidr))
     gateway: ((internal_gw))
@@ -46,7 +47,7 @@ instance_groups:
   resource_pool: vms
   persistent_disk_pool: disks
   networks:
-  - name: default
+  - name: host
     static_ips: [((internal_ip))]
   properties:
     agent:
